@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "TraffickController": {
+      "commandName": "Project",
+      "commandLineArgs": "--path \"/ws\"",
+      "nativeDebugging": false
+    }
+  }
+}
