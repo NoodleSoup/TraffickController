@@ -14,7 +14,13 @@ namespace TraffickController.WebSocketConnection
         #region SendState
         public static async Task SendState(HttpContext context, WebSocket webSocket)
         {
-            var jsonTrafficLight = JsonStringBuilder.BuildJsonString(); // Start setting up the JSON string builder TODO: Make it send dynamic states
+            string jsonTrafficLight;
+            
+            jsonTrafficLight = Receive.GetNewTrafficLight(); // Start setting up the JSON string builder TODO: Make it send dynamic states
+
+            if (String.IsNullOrEmpty(jsonTrafficLight))
+                jsonTrafficLight = JsonStringBuilder.BuildJsonString();
+
             var jsonBytes = Encoding.UTF8.GetBytes(jsonTrafficLight); // Convert the JSON object to bytes to send over WebSocket connection
 
             await webSocket.SendAsync(new ArraySegment<byte>(jsonBytes, 0, jsonBytes.Length), 0, true, CancellationToken.None);
