@@ -52,34 +52,21 @@ namespace TraffickController
             #region AcceptWebSocket
             app.Use(async (context, next) =>
             {
-                if (context.Request.Path == pathUrl)
+                WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
+
+                do // Check if the receive command didn't send 'close' as a disconnect notice
                 {
-                    if (context.WebSockets.IsWebSocketRequest) // Check if the recieve command didn't send 'close' as a disconnect notice
+                    if (sendStartState) // Send the start state once when there's a connection
                     {
-                        WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
 
-                        do
-                        {
-                            if (sendStartState) // Send the start state once when there's a connection
-                            {
-
-                                //await ServerTest.Test(buffer);
-                                sendStartState = await Send.SendStartState(context, webSocket);
-                            }
-
-                            await Send.SendState(context, webSocket); // Needs some smart stuff to do the traffic lights logic
-                            receive = await Receive.ReceiveSocket(context, webSocket, buffer);
-                        } while (receive);
+                        //await ServerTest.Test(buffer);
+                        sendStartState = await Send.SendStartState(context, webSocket);
                     }
-                    else
-                    {
-                        context.Response.StatusCode = 400;
-                    }
-                }
-                else
-                {
-                    await next();
-                }
+                    await Send.SendState(context, webSocket); // Needs some smart stuff to do the traffic lights logic
+                    receive = await Receive.ReceiveSocket(context, webSocket, buffer);
+                } while (receive);
+                
+                context.Response.StatusCode = 400;
 
             });
             #endregion
