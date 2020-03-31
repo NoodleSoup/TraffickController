@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading; 
 using System.Net.WebSockets;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Logging.Debug;
 
 using TraffickController.WebSocketConnection;
 using TraffickController.Tests;
+using System.Threading.Tasks;
 
 namespace TraffickController
 {
@@ -59,8 +61,22 @@ namespace TraffickController
                     if (sendStartState) // Send the start state once when there's a connection
                     {
 
-                        //await ServerTest.Test(buffer);
-                        sendStartState = await Send.SendStartState(context, webSocket);
+                        Task receiveTask = new Task(async () => receive = await Receive.ReceiveSocket(context, webSocket, buffer));
+                        receiveTask.Start();
+
+                        do
+                        {
+                            if (sendStartState) // Send the start state once when there's a connection
+                            {
+
+                                //await ServerTest.Test(buffer);
+                                sendStartState = await Send.SendStartState(context, webSocket);
+                            }
+
+                            await Send.SendState(context, webSocket); // Needs some smart stuff to do the traffic lights logic
+                        } while (receive);
+
+                        // Dispose receive task???
                     }
                     await Send.SendState(context, webSocket); // Needs some smart stuff to do the traffic lights logic
                     receive = await Receive.ReceiveSocket(context, webSocket, buffer);
