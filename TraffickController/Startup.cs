@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
-using System.Threading; 
+using System.Threading;
+using System.Threading.Tasks;
 using System.Net.WebSockets;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -11,7 +12,6 @@ using Microsoft.Extensions.Logging.Debug;
 
 using TraffickController.WebSocketConnection;
 using TraffickController.Tests;
-using System.Threading.Tasks;
 
 namespace TraffickController
 {
@@ -72,8 +72,8 @@ namespace TraffickController
                                 //await ServerTest.Test(buffer);
                                 sendStartState = await Send.SendStartState(context, webSocket);
                             }
-
                             await Send.SendState(context, webSocket); // Needs some smart stuff to do the traffic lights logic
+                            Thread.Sleep(500);
                         } while (receive);
 
                         // Dispose receive task???
