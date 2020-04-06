@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using TraffickController.JsonStrings;
+using TraffickController.TrafficLight;
 
 namespace TraffickController.WebSocketConnection
 {
@@ -13,10 +14,8 @@ namespace TraffickController.WebSocketConnection
     {
         #region SendState
         public static async Task SendState(HttpContext context, WebSocket webSocket)
-        {
-            string jsonTrafficLight;
-            
-            jsonTrafficLight = Receive.GetNewTrafficLight(); // Start setting up the JSON string builder TODO: Make it send dynamic states
+        {            
+            string jsonTrafficLight = Data.GetNewTrafficLight(); // Start setting up the JSON string builder TODO: Make it send dynamic states
 
             if (String.IsNullOrEmpty(jsonTrafficLight))
                 jsonTrafficLight = JsonStringBuilder.BuildJsonString();
