@@ -35,6 +35,7 @@ namespace TraffickController
         {
             var receive = true;
             var sendStartState = true;
+            Task t = null;
 
             if (env.IsDevelopment())
             {
@@ -56,36 +57,29 @@ namespace TraffickController
             {
                 WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
 
-                do // Check if the receive command didn't send 'close' as a disconnect notice
+                do
                 {
                     if (sendStartState) // Send the start state once when there's a connection
                     {
-
-                        Task receiveTask = new Task(async () => receive = await Receive.ReceiveSocket(context, webSocket, buffer));
-                        receiveTask.Start();
-
-                        do
-                        {
-                            if (sendStartState) // Send the start state once when there's a connection
-                            {
-
-                                //await ServerTest.Test(buffer);
-                                sendStartState = await Send.SendStartState(context, webSocket);
-                            }
-                            await Send.SendState(context, webSocket); // Needs some smart stuff to do the traffic lights logic
-                            Thread.Sleep(500);
-                        } while (receive);
-
-                        // Dispose receive task???
+                        //await ServerTest.Test(buffer);
+                        sendStartState = await Send.SendStartState(context, webSocket);
                     }
                     await Send.SendState(context, webSocket); // Needs some smart stuff to do the traffic lights logic
-                    receive = await Receive.ReceiveSocket(context, webSocket, buffer);
+                    if(t == null || t.IsCompleted)
+                        t = Task.Run(async () => receive = await Receive.ReceiveSocket(context, webSocket, buffer));
+                    Thread.Sleep(500);
                 } while (receive);
                 
                 context.Response.StatusCode = 400;
 
             });
             #endregion
+        }
+
+        private async Task<bool> TestReceiveAsync(Microsoft.AspNetCore.Http.HttpContext context, WebSocket webSocket)
+        {
+            bool receive = await Receive.ReceiveSocket(context, webSocket, buffer);
+            return receive;
         }
     }
 }
