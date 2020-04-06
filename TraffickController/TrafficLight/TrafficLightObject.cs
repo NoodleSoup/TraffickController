@@ -1,4 +1,4 @@
-﻿namespace TraffickController.JsonStrings
+﻿namespace TraffickController.TrafficLight
 {
     public class TrafficLightObject
     {
@@ -21,7 +21,6 @@
         public int D2 { get; set; }
         public int D3 { get; set; }
         public int E1 { get; set; }
-        public int E2 { get; set; }
         public int EV1 { get; set; }
         public int EV2 { get; set; }
         public int EV3 { get; set; }
