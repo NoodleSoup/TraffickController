@@ -15,8 +15,9 @@ namespace TraffickController.WebSocketConnection
         #region SendState
         public static async Task SendState(HttpContext context, WebSocket webSocket)
         {            
-            string jsonTrafficLight = Data.GetNewTrafficLight(); // Start setting up the JSON string builder TODO: Make it send dynamic states
+            string jsonTrafficLight = Data.GetNewTrafficLight(); // Start setting up the JSON string builder
 
+            // If the trafficlight string is empty for some reason send the default response (start state)
             if (String.IsNullOrEmpty(jsonTrafficLight))
                 jsonTrafficLight = JsonStringBuilder.BuildJsonString();
 
