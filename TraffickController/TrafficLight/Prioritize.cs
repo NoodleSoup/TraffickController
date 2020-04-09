@@ -7,7 +7,8 @@ namespace TraffickController.TrafficLight
     public class Prioritize
     {
         private static List<string> _lightPriority;
-        public static List<string> PrioritizeLights()
+        #region PrioritizeLights
+        private static List<string> PrioritizeLights()
         {
             Regex rx = new Regex(@"([A-z]*?[0-9]): (\d)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
             MatchCollection matches;
@@ -63,6 +64,15 @@ namespace TraffickController.TrafficLight
             }
 
             return _lightPriority;
+        }
+        #endregion
+
+        public static string PriotizedLights()
+        {
+            if (_lightPriority[0] == "Test")
+                return "test";
+
+            return "";
         }
     }
 }

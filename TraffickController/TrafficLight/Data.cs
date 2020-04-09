@@ -14,6 +14,7 @@ namespace TraffickController.TrafficLight
         #region SetTrafficData
         public static void SetTrafficData(TrafficLightObject trafficLightObject)
         {
+            // TODO: Change this to where we check the priority of the trafficlights
             string newTrafficLight = JsonStringBuilder.BuildJsonString(
                 A1: trafficLightObject.A1, A2: trafficLightObject.A2, A3: trafficLightObject.A3,
                 A4: trafficLightObject.A4, AB1: trafficLightObject.AB1, AB2: trafficLightObject.AB2,
