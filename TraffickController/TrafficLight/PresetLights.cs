@@ -15,12 +15,13 @@ namespace TraffickController.TrafficLight
         #endregion
 
         #region ReturnPreset
-        public static string ReturnPreset(string light)
+        public static string ReturnPreset(Dictionary<string, int> lightsReceived)
         {
-            Dictionary<string, int> test = new Dictionary<string, int>() { { "A1", 0 } }; // test dictionary
-            
-            var result = FindPreset(Data.ToDict());
-            
+            if (lightsReceived == null)
+                return JsonStringBuilder.BuildJsonString();
+
+            var result = FindPreset(lightsReceived);
+
             return result;
         }
         #endregion
