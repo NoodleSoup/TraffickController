@@ -9,9 +9,12 @@ namespace TraffickController.TrafficLight
     public class PresetLights
     {
         #region Presets
-        private static List<string> preset = new List<string>() { "A2", "A3", "A4", "B2", "B3", "B4" }; // Preset, welke stoplichten tegelijk aankunnen
-        private static List<string> presetOne = new List<string>() { "C1", "C2", "C3", "A4" };
-        private static List<string> presetTwo = new List<string>() { "D1", "D2", "D3", "B4" };
+        private static readonly List<List<string>> presets = new List<List<string>>() { 
+            new List<string>() { "A2", "A3", "A4", "B2", "B3", "B4" }, 
+            new List<string>() { "C1", "C2", "C3", "A4" }, 
+            new List<string>() { "D1", "D2", "D3", "B4" } 
+        }; // Preset, welke stoplichten tegelijk aankunnen
+
         #endregion
 
         #region ReturnPreset
@@ -71,16 +74,13 @@ namespace TraffickController.TrafficLight
 
             foreach (var x in trafficAtLights)
             {
-                if (preset.Contains(x.Key))
+                foreach (var preset in presets)
                 {
-                    foreach (var i in preset)
-                        lightsAtSameTime.Add(i, x.Value);
-
-                    foreach (var i in presetOne)
-                        lightsAtSameTime.Add(i, x.Value);
-
-                    foreach (var i in presetTwo)
-                        lightsAtSameTime.Add(i, x.Value);
+                    if (preset.Contains(x.Key))
+                    {
+                        foreach (var i in preset)
+                            lightsAtSameTime.Add(i, x.Value);
+                    }
                 }
             }
 
