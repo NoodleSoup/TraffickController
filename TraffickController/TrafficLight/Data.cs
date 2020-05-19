@@ -15,10 +15,9 @@ namespace TraffickController.TrafficLight
         #endregion
 
         #region GetNewTrafficLight
-        public static string GetNewTrafficLight()
+        public static string GetNewTrafficLight(string lightColor = "Green")
         {
-            Console.WriteLine(_trafficLightObject);
-            return PresetLights.ReturnPreset(ToDict());
+            return PresetLights.ReturnPreset(ToDict(), lightColor);
         }
         #endregion
 
@@ -70,8 +69,8 @@ namespace TraffickController.TrafficLight
             }
             catch (Exception e)
             {
-                var trace = new System.Diagnostics.StackFrame(e, true);
-                Console.WriteLine($"Exception in {trace.GetFileName()} line {trace.GetFileLineNumber()}: {e}");
+                // var trace = new System.Diagnostics.StackFrame(e);
+                // Console.WriteLine($"Exception in {trace.GetFileName()} line {trace.GetFileLineNumber()}: {e}");
                 return null; // return null to make the next function send the start state instead of trying to find a preset
             }
 

@@ -53,7 +53,7 @@ namespace TraffickController.JsonStrings
                 GV3 = GV3,
                 GV4 = GV4
             };
-            
+
             return JsonConvert.SerializeObject(trafficLights);
         }
         #endregion

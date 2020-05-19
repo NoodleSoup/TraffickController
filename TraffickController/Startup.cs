@@ -18,7 +18,8 @@ namespace TraffickController
     public class Startup
     {
         private string pathUrl = Program.getPathUrl();
-        private byte[] buffer = new byte[1024 * 4];
+        private byte[] buffer = new byte[1024 * 6];
+        private WebSocket webSocket;
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLogging(builder =>
@@ -35,7 +36,9 @@ namespace TraffickController
         {
             var receive = true;
             var sendStartState = true;
-            Task t = null;
+            Task receiveTask = null;
+            Task sendTask = null;
+            bool connected = false;
 
             if (env.IsDevelopment())
             {
@@ -44,18 +47,20 @@ namespace TraffickController
 
             var webSocketOptions = new WebSocketOptions()
             {
-                KeepAliveInterval = TimeSpan.FromSeconds(120),
-                ReceiveBufferSize = 4 * 1024,
+                KeepAliveInterval = TimeSpan.FromSeconds(5),
+                ReceiveBufferSize = 6 * 1024,
             };
-
-            webSocketOptions.AllowedOrigins.Any(); // Set app to accept all header formats
 
             app.UseWebSockets(webSocketOptions);
 
             #region AcceptWebSocket
             app.Use(async (context, next) =>
             {
-                WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
+                if (!connected)
+                {
+                    webSocket = await context.WebSockets.AcceptWebSocketAsync();
+                    connected = true;
+                }
 
                 do
                 {
@@ -64,12 +69,24 @@ namespace TraffickController
                         //await ServerTest.Test(buffer);
                         sendStartState = await Send.SendStartState(context, webSocket);
                     }
-                    await Send.SendState(context, webSocket); // Needs some smart stuff to do the traffic lights logic
-                    if(t == null || t.IsCompleted)
-                        t = Task.Run(async () => receive = await Receive.ReceiveSocket(context, webSocket, buffer));
-                    Thread.Sleep(500);
+
+                    if (sendTask == null || sendTask.IsCompleted)
+                    {
+                        sendTask = Task.Run(async () => await Send.SendState(context, webSocket));
+                    }
+                    // await Send.SendState(context, webSocket); // Needs some smart stuff to do the traffic lights logic
+
+                    if(receiveTask == null || receiveTask.IsCompleted)
+                    {
+                        Console.WriteLine($"Start Receive: {DateTime.Now.ToString("h:mm:ss")}");
+                        receiveTask = Task.Run(async () => receive = await Receive.ReceiveSocket(context, webSocket, buffer));
+                        Console.WriteLine($"End Receive: {DateTime.Now.ToString("h:mm:ss")}");
+                    }
                 } while (receive);
-                
+
+                sendStartState = true;
+                connected = false;
+
                 context.Response.StatusCode = 400;
 
             });

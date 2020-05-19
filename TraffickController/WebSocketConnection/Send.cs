@@ -16,20 +16,47 @@ namespace TraffickController.WebSocketConnection
         #region SendState
         public static async Task SendState(HttpContext context, WebSocket webSocket)
         {
-            jsonTrafficLight = Data.GetNewTrafficLight(); // Start setting up the JSON string builder
+            jsonTrafficLight = Data.GetNewTrafficLight(); // Start setting up the JSON string builder JsonStringBuilder.BuildJsonString();
 
             // If the trafficlight string is empty for some reason send the default response (start state)
             if (String.IsNullOrEmpty(jsonTrafficLight))
                 jsonTrafficLight = JsonStringBuilder.BuildJsonString();
 
-            for (int x = 0; x < 3; x++){
+            var jsonBytes = Encoding.UTF8.GetBytes(jsonTrafficLight); // Convert the JSON object to bytes to send over WebSocket connection
 
-                var jsonBytes = Encoding.UTF8.GetBytes(jsonTrafficLight); // Convert the JSON object to bytes to send over WebSocket connection
-
+            try
+            {
                 await webSocket.SendAsync(new ArraySegment<byte>(jsonBytes, 0, jsonBytes.Length), 0, true, CancellationToken.None);
-
-                Thread.Sleep(1000);
+            }catch(WebSocketException we)
+            {
+                System.Diagnostics.Debug.WriteLine($"Exception: {we.Message} in {we.Source} at {DateTime.Now.ToString("yyyy-MM-dd H:mm:ss")}");
+                return;
             }
+
+            Thread.Sleep(6000);
+
+            jsonTrafficLight = Data.GetNewTrafficLight("Orange"); // Start setting up the JSON string builder JsonStringBuilder.BuildJsonString();
+
+            // If the trafficlight string is empty for some reason send the default response (start state)
+            if (String.IsNullOrEmpty(jsonTrafficLight))
+                jsonTrafficLight = JsonStringBuilder.BuildJsonString();
+
+            jsonBytes = Encoding.UTF8.GetBytes(jsonTrafficLight); // Convert the JSON object to bytes to send over WebSocket connection
+
+            await webSocket.SendAsync(new ArraySegment<byte>(jsonBytes, 0, jsonBytes.Length), 0, true, CancellationToken.None);
+
+            Thread.Sleep(2000);
+
+            jsonTrafficLight = Data.GetNewTrafficLight("Red"); // Start setting up the JSON string builder JsonStringBuilder.BuildJsonString();
+
+            // If the trafficlight string is empty for some reason send the default response (start state)
+            if (String.IsNullOrEmpty(jsonTrafficLight))
+                jsonTrafficLight = JsonStringBuilder.BuildJsonString();
+
+            jsonBytes = Encoding.UTF8.GetBytes(jsonTrafficLight); // Convert the JSON object to bytes to send over WebSocket connection
+
+            await webSocket.SendAsync(new ArraySegment<byte>(jsonBytes, 0, jsonBytes.Length), 0, true, CancellationToken.None);
+            Thread.Sleep(1000);
 
             /* TODO: Think about this solution to see what is better
             * The above just sends the same thing every second for 3 seconds long, the below sends it once
