@@ -56,6 +56,8 @@ namespace TraffickController
             #region AcceptWebSocket
             app.Use(async (context, next) =>
             {
+                bool firstTime = true;
+
                 if (!connected)
                 {
                     webSocket = await context.WebSockets.AcceptWebSocketAsync();
@@ -81,13 +83,17 @@ namespace TraffickController
                         Console.WriteLine($"Start Receive: {DateTime.Now.ToString("h:mm:ss")}");
                         receiveTask = Task.Run(async () => receive = await Receive.ReceiveSocket(context, webSocket, buffer));
                         Console.WriteLine($"End Receive: {DateTime.Now.ToString("h:mm:ss")}");
+                        if (firstTime)
+                        {
+                            Thread.Sleep(50);
+                            firstTime = false;
+                        }
                     }
                 } while (receive);
 
                 sendStartState = true;
                 connected = false;
-
-                context.Response.StatusCode = 400;
+                buffer = new byte[1024 * 6];
 
             });
             #endregion
