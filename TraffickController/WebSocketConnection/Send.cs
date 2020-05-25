@@ -56,7 +56,7 @@ namespace TraffickController.WebSocketConnection
             jsonBytes = Encoding.UTF8.GetBytes(jsonTrafficLight); // Convert the JSON object to bytes to send over WebSocket connection
 
             await webSocket.SendAsync(new ArraySegment<byte>(jsonBytes, 0, jsonBytes.Length), 0, true, CancellationToken.None);
-            Thread.Sleep(1000);
+            Thread.Sleep(3000);
 
             /* TODO: Think about this solution to see what is better
             * The above just sends the same thing every second for 3 seconds long, the below sends it once
