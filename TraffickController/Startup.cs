@@ -60,7 +60,6 @@ namespace TraffickController
 
                 if (!connected)
                 {
-                    Console.WriteLine("Testing connection");
                     webSocket = await context.WebSockets.AcceptWebSocketAsync();
                     connected = true;
                 }
@@ -93,7 +92,6 @@ namespace TraffickController
 
                     if (webSocket.State == WebSocketState.Aborted)
                     {
-                        Console.WriteLine("Found websocket closed");
                         await webSocket.CloseAsync(new WebSocketCloseStatus(), "Client disconnected.", new CancellationToken());
                         sendStartState = true;
                         connected = false;
