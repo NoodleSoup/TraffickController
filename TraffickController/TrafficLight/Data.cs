@@ -70,7 +70,7 @@ namespace TraffickController.TrafficLight
             catch (Exception e)
             {
                 // var trace = new System.Diagnostics.StackFrame(e);
-                // Console.WriteLine($"Exception in {trace.GetFileName()} line {trace.GetFileLineNumber()}: {e}");
+                System.Diagnostics.Debug.WriteLine($"Exception: {e.Message} Source: {e.Source} Method: {e.TargetSite}");
                 return null; // return null to make the next function send the start state instead of trying to find a preset
             }
 

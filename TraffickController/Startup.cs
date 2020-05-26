@@ -47,7 +47,7 @@ namespace TraffickController
 
             var webSocketOptions = new WebSocketOptions()
             {
-                KeepAliveInterval = TimeSpan.FromSeconds(5),
+                KeepAliveInterval = TimeSpan.FromSeconds(300),
                 ReceiveBufferSize = 6 * 1024,
             };
 
@@ -89,8 +89,19 @@ namespace TraffickController
                             firstTime = false;
                         }
                     }
+
+                    if (webSocket.State == WebSocketState.Aborted)
+                    {
+                        await webSocket.CloseAsync(new WebSocketCloseStatus(), "Client disconnected.", new CancellationToken());
+                        sendStartState = true;
+                        connected = false;
+                        buffer = new byte[1024 * 6];
+                        break;
+                    }
                 } while (receive);
 
+                sendTask.Dispose();
+                receiveTask.Dispose();
                 sendStartState = true;
                 connected = false;
                 buffer = new byte[1024 * 6];

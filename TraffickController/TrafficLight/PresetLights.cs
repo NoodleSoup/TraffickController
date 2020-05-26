@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Timers;
 
 using TraffickController.JsonStrings;
 
@@ -24,6 +24,8 @@ namespace TraffickController.TrafficLight
         };
         private static int _count = 0;
         private static Dictionary<string, int> lightsAtSameTime = new Dictionary<string, int>();
+        private static Timer _aTimer;
+        private static bool _elapsed = false;
         #endregion
 
         #region ReturnPreset
@@ -44,35 +46,46 @@ namespace TraffickController.TrafficLight
                 default:
                     return JsonStringBuilder.BuildJsonString();
             }
-            // if (lightsReceived == null)
-            //     return JsonStringBuilder.BuildJsonString();
+        }
+        #endregion
 
-            // var result = FindPreset(lightsReceived);
-
-            // return result;
+        #region OnTimedEvent
+        private static void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
+        {
+            _elapsed = true;
         }
         #endregion
 
         #region FindPreset
         private static string FindPreset(Dictionary<string, int> trafficAtLights)
         {
-            int _oldCount = 0;
+            int oldCount = -1;
+            _aTimer = new System.Timers.Timer();
+            _aTimer.Interval = 20000;
+            _aTimer.AutoReset = true;
+            _aTimer.Enabled = true;
+
+            _aTimer.Elapsed += OnTimedEvent;
+
             lightsAtSameTime = new Dictionary<string, int>();
 
-            if (trafficAtLights.GetValueOrDefault("AB1") >= 1 && _count != 4)
+            if(trafficAtLights.GetValueOrDefault("AB1") >= 1 && _count != 4 && _elapsed)
             {
-                _oldCount = _count;
                 _count = 3;
+                _elapsed = false;
+                oldCount = _count;
             }
-            else if (trafficAtLights.GetValueOrDefault("AB2") >= 1 && _count != 7)
+            else if (trafficAtLights.GetValueOrDefault("AB2") >= 1 && _count != 7 && _elapsed)
             {
-                _oldCount = _count;
                 _count = 6;
+                _elapsed = false;
+                oldCount = _count;
             }
-            else if (trafficAtLights.GetValueOrDefault("BB1") >= 1 && _count != 10)
+            else if (trafficAtLights.GetValueOrDefault("BB1") >= 1 && _count != 9 && _elapsed)
             {
-                _oldCount = _count;
-                _count = 9;
+                _count = 8;
+                _elapsed = false;
+                oldCount = _count;
             }
 
             foreach (var x in presets[_count])
@@ -86,8 +99,7 @@ namespace TraffickController.TrafficLight
                     }
                 }
             }
-
-            if (_oldCount > 0) _count = _oldCount;
+            if (oldCount > -1) _count = oldCount;
             else _count++;
 
             if(_count > 10){
