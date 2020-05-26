@@ -69,19 +69,19 @@ namespace TraffickController.TrafficLight
 
             lightsAtSameTime = new Dictionary<string, int>();
 
-            if(trafficAtLights.GetValueOrDefault("AB1") >= 1 && _count != 4 && _elapsed)
+            if(trafficAtLights.GetValueOrDefault("AB1") >= 1 && _count != 3 && _count != 4 && _elapsed)
             {
                 _count = 3;
                 _elapsed = false;
                 oldCount = _count;
             }
-            else if (trafficAtLights.GetValueOrDefault("AB2") >= 1 && _count != 7 && _elapsed)
+            else if (trafficAtLights.GetValueOrDefault("AB2") >= 1 && _count != 6 && _count != 7 && _elapsed)
             {
                 _count = 6;
                 _elapsed = false;
                 oldCount = _count;
             }
-            else if (trafficAtLights.GetValueOrDefault("BB1") >= 1 && _count != 10 && _elapsed)
+            else if (trafficAtLights.GetValueOrDefault("BB1") >= 1 && _count != 9 && _count != 10 && _elapsed)
             {
                 _count = 9;
                 _elapsed = false;
