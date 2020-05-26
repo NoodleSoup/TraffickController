@@ -12,15 +12,16 @@ namespace TraffickController.TrafficLight
         private static readonly List<List<string>> presets = new List<List<string>>() {
             new List<string>() { "A1", "A2", "A3", "A4", "D3" },
             new List<string>() { "B1", "B2", "B3", "B4", "C3" },
-            new List<string>() { "C2", "D2", "E1", "EV1", "EV2", "EV3", "EV4", "GF1", "GF2", "GV1", "GV2", "GV3", "GV4" },
-            new List<string>() { "FF2", "FF1", "FV1", "FV2", "FV3", "FV4", "B5", "BB1", "AB1" },
-            new List<string>() { "D1", "D2", "D3", "B4" },
             new List<string>() { "C1", "C2", "C3", "A4" },
-            new List<string>() { "A2", "A3", "AB2", "B2", "B3", "B5" },
-            new List<string>() { "D3", "A1", "AB1" },
+            new List<string>() { "D1", "D2", "D3", "B4" },
+            new List<string>() { "FF2", "FF1", "FV1", "FV2", "FV3", "FV4", "B5", "E1", "EV1", "EV2", "EV3", "EV4", "GF1", "GF2", "GV1", "GV2", "GV3", "GV4" },
+            new List<string>() { "B2", "B3", "A2", "A3", "A4", "FF2", "FF1", "FV1", "FV2", "FV3", "FV4", "B5"},
+            new List<string>() { "D3", "A1", "C3", "B1" },
             new List<string>() { "C2", "D2", "E1", "EV1", "EV2", "EV3", "EV4", "GF1", "GF2", "GV1", "GV2", "GV3", "GV4" },
-            new List<string>() { "B1", "BB1", "FF2", "FF1", "FV1", "FV2", "FV3", "FV4", "B5"},
-            new List<string>() { "D1", "C1", "AB2", "B4" },
+            new List<string>() { "D1", "C1", "A4", "B4" },
+            new List<string>() { "D3", "A1", "AB1" },
+            new List<string>() { "D1", "D3", "AB2", "B4" },
+            new List<string>() { "FF2", "FF1", "FV1", "FV2", "FV3", "FV4", "B5", "BB1", "C1", "C3" },
         };
         private static int _count = 0;
         private static Dictionary<string, int> lightsAtSameTime = new Dictionary<string, int>();
@@ -69,23 +70,23 @@ namespace TraffickController.TrafficLight
 
             lightsAtSameTime = new Dictionary<string, int>();
 
-            if(trafficAtLights.GetValueOrDefault("AB1") >= 1 && _count != 3 && _count != 4 && _elapsed)
+            if(trafficAtLights.GetValueOrDefault("AB1") >= 1 && _elapsed)
             {
-                _count = 3;
-                _elapsed = false;
                 oldCount = _count;
-            }
-            else if (trafficAtLights.GetValueOrDefault("AB2") >= 1 && _count != 6 && _count != 7 && _elapsed)
-            {
-                _count = 6;
-                _elapsed = false;
-                oldCount = _count;
-            }
-            else if (trafficAtLights.GetValueOrDefault("BB1") >= 1 && _count != 9 && _count != 10 && _elapsed)
-            {
                 _count = 9;
                 _elapsed = false;
+            }
+            else if (trafficAtLights.GetValueOrDefault("AB2") >= 1 && _elapsed)
+            {
                 oldCount = _count;
+                _count = 10;
+                _elapsed = false;
+            }
+            else if (trafficAtLights.GetValueOrDefault("BB1") >= 1 && _elapsed)
+            {
+                oldCount = _count;
+                _count = 11;
+                _elapsed = false;
             }
 
             foreach (var x in presets[_count])
@@ -102,7 +103,7 @@ namespace TraffickController.TrafficLight
             if (oldCount > -1) _count = oldCount;
             else _count++;
 
-            if(_count > 10){
+            if(_count > 8){
                 _count = 0;
             }
 
