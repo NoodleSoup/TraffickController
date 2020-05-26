@@ -81,9 +81,9 @@ namespace TraffickController.TrafficLight
                 _elapsed = false;
                 oldCount = _count;
             }
-            else if (trafficAtLights.GetValueOrDefault("BB1") >= 1 && _count != 9 && _elapsed)
+            else if (trafficAtLights.GetValueOrDefault("BB1") >= 1 && _count != 10 && _elapsed)
             {
-                _count = 8;
+                _count = 9;
                 _elapsed = false;
                 oldCount = _count;
             }
