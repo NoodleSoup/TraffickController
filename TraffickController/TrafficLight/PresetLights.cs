@@ -18,6 +18,7 @@ namespace TraffickController.TrafficLight
             new List<string>() { "C1", "C2", "C3", "A4" },
             new List<string>() { "A2", "A3", "AB2", "B2", "B3", "B5" },
             new List<string>() { "D3", "A1", "AB1" },
+            new List<string>() { "C2", "D2", "E1", "EV1", "EV2", "EV3", "EV4", "GF1", "GF2", "GV1", "GV2", "GV3", "GV4" },
             new List<string>() { "B1", "BB1", "FF2", "FF1", "FV1", "FV2", "FV3", "FV4", "B5"},
             new List<string>() { "D1", "C1", "AB2", "B4" },
         };
@@ -55,14 +56,24 @@ namespace TraffickController.TrafficLight
         #region FindPreset
         private static string FindPreset(Dictionary<string, int> trafficAtLights)
         {
+            int _oldCount = 0;
             lightsAtSameTime = new Dictionary<string, int>();
 
-            if(trafficAtLights.GetValueOrDefault("AB1") >= 1 && _count != 4) 
+            if (trafficAtLights.GetValueOrDefault("AB1") >= 1 && _count != 4)
+            {
+                _oldCount = _count;
                 _count = 3;
-            else if (trafficAtLights.GetValueOrDefault("AB2") >= 1 && _count != 7) 
+            }
+            else if (trafficAtLights.GetValueOrDefault("AB2") >= 1 && _count != 7)
+            {
+                _oldCount = _count;
                 _count = 6;
-            else if (trafficAtLights.GetValueOrDefault("BB1") >= 1 && _count != 9)
-                _count = 8;
+            }
+            else if (trafficAtLights.GetValueOrDefault("BB1") >= 1 && _count != 10)
+            {
+                _oldCount = _count;
+                _count = 9;
+            }
 
             foreach (var x in presets[_count])
             {
@@ -76,9 +87,10 @@ namespace TraffickController.TrafficLight
                 }
             }
 
-            _count++;
+            if (_oldCount > 0) _count = _oldCount;
+            else _count++;
 
-            if(_count > 9){
+            if(_count > 10){
                 _count = 0;
             }
 
