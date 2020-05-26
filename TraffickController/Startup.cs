@@ -47,7 +47,7 @@ namespace TraffickController
 
             var webSocketOptions = new WebSocketOptions()
             {
-                KeepAliveInterval = TimeSpan.FromSeconds(5),
+                KeepAliveInterval = TimeSpan.FromSeconds(300),
                 ReceiveBufferSize = 6 * 1024,
             };
 
@@ -60,6 +60,7 @@ namespace TraffickController
 
                 if (!connected)
                 {
+                    Console.WriteLine("Testing connection");
                     webSocket = await context.WebSockets.AcceptWebSocketAsync();
                     connected = true;
                 }
@@ -89,8 +90,20 @@ namespace TraffickController
                             firstTime = false;
                         }
                     }
+
+                    if (webSocket.State == WebSocketState.Aborted)
+                    {
+                        Console.WriteLine("Found websocket closed");
+                        await webSocket.CloseAsync(new WebSocketCloseStatus(), "Client disconnected.", new CancellationToken());
+                        sendStartState = true;
+                        connected = false;
+                        buffer = new byte[1024 * 6];
+                        break;
+                    }
                 } while (receive);
 
+                sendTask.Dispose();
+                receiveTask.Dispose();
                 sendStartState = true;
                 connected = false;
                 buffer = new byte[1024 * 6];

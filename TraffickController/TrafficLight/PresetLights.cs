@@ -41,12 +41,6 @@ namespace TraffickController.TrafficLight
                 default:
                     return JsonStringBuilder.BuildJsonString();
             }
-            // if (lightsReceived == null)
-            //     return JsonStringBuilder.BuildJsonString();
-
-            // var result = FindPreset(lightsReceived);
-
-            // return result;
         }
         #endregion
 
