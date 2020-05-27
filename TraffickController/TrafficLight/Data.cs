@@ -5,7 +5,7 @@ namespace TraffickController.TrafficLight
 {
     public class Data
     {
-        private static TrafficLightObject _trafficLightObject = new TrafficLightObject();
+        private static TrafficLightObject _trafficLightObject = null;
 
         #region SetTrafficData
         public static void SetTrafficData(TrafficLightObject trafficLightObject)
@@ -67,8 +67,9 @@ namespace TraffickController.TrafficLight
                 trafficLightDict.Add("GV4", _trafficLightObject.GV4);
                 #endregion
             }
-            catch (NullReferenceException e)
+            catch (Exception e)
             {
+                // var trace = new System.Diagnostics.StackFrame(e);
                 System.Diagnostics.Debug.WriteLine($"Exception: {e.Message} Source: {e.Source} Method: {e.TargetSite}");
                 return null; // return null to make the next function send the start state instead of trying to find a preset
             }

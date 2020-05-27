@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 
 using TraffickController.TrafficLight;
@@ -22,33 +22,19 @@ namespace TraffickController.WebSocketConnection
                 byte[] msgBytes = buffer.Take(result.Count).ToArray();
                 string rcvMsg = Encoding.UTF8.GetString(msgBytes);
 
-                (bool valid, string key) = ValidateJson.Validate(rcvMsg);
+                Console.WriteLine($"Received: {rcvMsg}");
+                var jsonObject = JsonConvert.DeserializeObject<TrafficLightObject>(rcvMsg);
+                Data.SetTrafficData(jsonObject);
 
-                if (valid)
+                if (result.CloseStatus.HasValue || String.IsNullOrEmpty(rcvMsg))
                 {
-                    var jsonObject = JsonConvert.DeserializeObject<TrafficLightObject>(rcvMsg);
-                    Data.SetTrafficData(jsonObject);
-
-                    if (result.CloseStatus.HasValue || String.IsNullOrEmpty(rcvMsg))
-                    {
-                        Data.SetTrafficData(new TrafficLightObject());
-                        return false;
-                    }
-
-                    return true;
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"JSON not valid, missing key: {key}");
-
-                    var jsonBytes = Encoding.UTF8.GetBytes($"JSON not valid, missing key: {key}");
-                    await webSocket.SendAsync(new ArraySegment<byte>(jsonBytes, 0, jsonBytes.Length), 0, true, CancellationToken.None);
-
+                    Data.SetTrafficData(new TrafficLightObject());
                     return false;
                 }
 
-            }
-            catch(WebSocketException we)
+                return true;
+
+            }catch(WebSocketException we)
             {
                 System.Diagnostics.Debug.WriteLine($"Exception: {we.Message} in {we.Source} at {DateTime.Now.ToString("yyyy-MM-dd H:mm:ss")}");
                 return false;

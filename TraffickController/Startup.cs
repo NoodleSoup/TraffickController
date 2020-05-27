@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net.WebSockets;
@@ -17,9 +16,9 @@ namespace TraffickController
 {
     public class Startup
     {
-        private string pathUrl = Program.getPathUrl();
-        private byte[] buffer = new byte[1024 * 6];
-        private WebSocket webSocket;
+        private string _pathUrl = Program.getPathUrl();
+        private byte[] _buffer = new byte[1024 * 6];
+        private WebSocket _webSocket;
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLogging(builder =>
@@ -60,7 +59,7 @@ namespace TraffickController
 
                 if (!connected)
                 {
-                    webSocket = await context.WebSockets.AcceptWebSocketAsync();
+                    _webSocket = await context.WebSockets.AcceptWebSocketAsync();
                     connected = true;
                 }
 
@@ -69,20 +68,17 @@ namespace TraffickController
                     if (sendStartState) // Send the start state once when there's a connection
                     {
                         //await ServerTest.Test(buffer);
-                        sendStartState = await Send.SendStartState(context, webSocket);
+                        sendStartState = await Send.SendStartState(context, _webSocket);
                     }
 
                     if (sendTask == null || sendTask.IsCompleted)
                     {
-                        sendTask = Task.Run(async () => await Send.SendState(context, webSocket));
+                        sendTask = Task.Run(async () => await Send.SendState(context, _webSocket));
                     }
-                    // await Send.SendState(context, webSocket); // Needs some smart stuff to do the traffic lights logic
 
                     if(receiveTask == null || receiveTask.IsCompleted)
                     {
-                        Console.WriteLine($"Start Receive: {DateTime.Now.ToString("h:mm:ss")}");
-                        receiveTask = Task.Run(async () => receive = await Receive.ReceiveSocket(context, webSocket, buffer));
-                        Console.WriteLine($"End Receive: {DateTime.Now.ToString("h:mm:ss")}");
+                        receiveTask = Task.Run(async () => receive = await Receive.ReceiveSocket(context, _webSocket, _buffer));
                         if (firstTime)
                         {
                             Thread.Sleep(50);
@@ -90,12 +86,12 @@ namespace TraffickController
                         }
                     }
 
-                    if (webSocket.State == WebSocketState.Aborted)
+                    if (_webSocket.State == WebSocketState.Closed)
                     {
-                        await webSocket.CloseAsync(new WebSocketCloseStatus(), "Client disconnected.", new CancellationToken());
+                        await _webSocket.CloseAsync(new WebSocketCloseStatus(), "Client disconnected.", new CancellationToken());
                         sendStartState = true;
                         connected = false;
-                        buffer = new byte[1024 * 6];
+                        _buffer = new byte[1024 * 6];
                         break;
                     }
                 } while (receive);
@@ -104,7 +100,7 @@ namespace TraffickController
                 receiveTask.Dispose();
                 sendStartState = true;
                 connected = false;
-                buffer = new byte[1024 * 6];
+                _buffer = new byte[1024 * 6];
 
             });
             #endregion
@@ -112,7 +108,7 @@ namespace TraffickController
 
         private async Task<bool> TestReceiveAsync(Microsoft.AspNetCore.Http.HttpContext context, WebSocket webSocket)
         {
-            bool receive = await Receive.ReceiveSocket(context, webSocket, buffer);
+            bool receive = await Receive.ReceiveSocket(context, webSocket, _buffer);
             return receive;
         }
     }

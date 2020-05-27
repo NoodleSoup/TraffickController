@@ -1,33 +1,63 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Schema;
 
 namespace TraffickController.TrafficLight
 {
     public class ValidateJson
     {
-        #region Variables
-        private static string[] _validKeys = new string[]{"A1", "A2", "A3", "A4", "AB1", "AB2",
-                                             "B1", "B2", "B3", "B4", "B5", "BB1",
-                                             "C1", "C2", "C3", "D1", "D2", "D3",
-                                             "E1", "EV1", "EV2", "EV3", "EV4",
-                                             "FF1", "FF2", "FV1", "FV2", "FV3",
-                                             "FV4", "GF1", "GF2", "GV1", "GV2",
-                                             "GV3", "GV4"};
-        #endregion
+        private static string jsonSchema = @"{
+	        'A1': 0,
+	        'A2': 0,
+	        'A3': 0,
+	        'A4': 0,
+	        'AB1': 0,
+	        'AB2': 0,
+	        'B1': 0,
+	        'B2': 0,
+	        'B3': 0,
+	        'B4': 0,
+	        'B5': 0,
+	        'BB1': 0,
+	        'C1': 0,
+	        'C2': 0,
+	        'C3': 0,
+	        'D1': 0,
+	        'D2': 0,
+	        'D3': 0,
+	        'E1' : 0,
+	        'EV1': 0,
+	        'EV2': 0,
+	        'EV3': 0,
+	        'EV4': 0,
+	        'FF1': 0,
+	        'FF2': 0,
+	        'FV1': 0,
+	        'FV2': 0,
+	        'FV3': 0,
+	        'FV4': 0,
+	        'GF1': 0,
+	        'GF2': 0,
+	        'GV1': 0,
+	        'GV2': 0,
+	        'GV3': 0,
+	        'GV4': 0
+        }";
 
         #region Validate
-        public static (bool, string) Validate(string json)
+        public static bool Validate(string json)
         {
+            #pragma warning disable CS0618 // Type or member is obsolete
+            JsonSchema schema = JsonSchema.Parse(jsonSchema);
             JObject trafficLight = JObject.Parse(json);
 
-            foreach (string x in _validKeys)
-            {
-                if (trafficLight.ContainsKey(x))
-                    continue;
-                else
-                    return (false, x);
-            }
+            IList<string> excMessages;
 
-            return (true, "");
+            bool isValid = trafficLight.IsValid(schema, out excMessages);
+
+            System.Diagnostics.Debug.WriteLine(excMessages);
+
+            return isValid;
         }
         #endregion
     }

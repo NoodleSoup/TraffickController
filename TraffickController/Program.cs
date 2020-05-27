@@ -21,12 +21,12 @@ namespace TraffickController
                     // Parse the command line variables.
                     Parser.Default.ParseArguments<Options>(args).WithParsed<Options>(o =>
                     {
-                        setPathUrl(o.path.ToString());
+                        setPathUrl(o.path.ToString()); // Moet nog veranderd worden voor de juiste shizzle
                     });
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"Exception in file: {e.Source} Message: {e.Message}");
+                    Console.WriteLine("Error: " + e);
                 }
             }
             CreateWebHostBuilder(args).Build().Run();
@@ -52,7 +52,7 @@ namespace TraffickController
 
     internal class Options
     {
-        [Option('p', "path", Required = true, HelpText = "Set path for connection.")]
+        [Option('p', "path", Required = true, HelpText = "Set path ding.")]
         public string path { get; set; }
     }
 }

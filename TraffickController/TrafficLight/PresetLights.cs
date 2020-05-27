@@ -9,7 +9,7 @@ namespace TraffickController.TrafficLight
     public class PresetLights
     {
         #region Presets & Count
-        private static readonly List<List<string>> _presets = new List<List<string>>() {
+        private static readonly List<List<string>> presets = new List<List<string>>() {
             new List<string>() { "A1", "A2", "A3", "A4", "D3" },
             new List<string>() { "B1", "B2", "B3", "B4", "C3" },
             new List<string>() { "FF2", "FF1", "FV1", "FV2", "FV3", "FV4", "B5", "E1", "EV1", "EV2", "EV3", "EV4", "GF1", "GF2", "GV1", "GV2", "GV3", "GV4" },
@@ -17,10 +17,10 @@ namespace TraffickController.TrafficLight
             new List<string>() { "C1", "C2", "C3", "A4" },
             new List<string>() { "D3", "A1", "AB1" },
             new List<string>() { "D1", "D3", "AB2", "B4" },
-            new List<string>() { "FF2", "FF1", "FV1", "FV2", "FV3", "FV4", "B5", "BB1", "C1", "C3" }
+            new List<string>() { "FF2", "FF1", "FV1", "FV2", "FV3", "FV4", "B5", "BB1", "C1", "C3" },
         };
         private static int _count = 0;
-        private static Dictionary<string, int> _lightsAtSameTime = new Dictionary<string, int>();
+        private static Dictionary<string, int> lightsAtSameTime = new Dictionary<string, int>();
         private static Timer _aTimer;
         private static bool _elapsed = false;
         #endregion
@@ -57,16 +57,14 @@ namespace TraffickController.TrafficLight
         private static string FindPreset(Dictionary<string, int> trafficAtLights)
         {
             int oldCount = -1;
-            _aTimer = new Timer
-            {
-                Interval = 20000,
-                AutoReset = true,
-                Enabled = true
-            };
+            _aTimer = new System.Timers.Timer();
+            _aTimer.Interval = 20000;
+            _aTimer.AutoReset = true;
+            _aTimer.Enabled = true;
 
             _aTimer.Elapsed += OnTimedEvent;
 
-            _lightsAtSameTime = new Dictionary<string, int>();
+            lightsAtSameTime = new Dictionary<string, int>();
 
             if(trafficAtLights.GetValueOrDefault("AB1") >= 1 && _elapsed)
             {
@@ -87,14 +85,14 @@ namespace TraffickController.TrafficLight
                 _elapsed = false;
             }
 
-            foreach (var x in _presets[_count])
+            foreach (var x in presets[_count])
             {
                 if (trafficAtLights.ContainsKey(x))
                 {
                     foreach (var i in trafficAtLights)
                     {
                         if (x == i.Key)
-                            _lightsAtSameTime.Add(x, i.Value);
+                            lightsAtSameTime.Add(x, i.Value);
                     }
                 }
             }
@@ -105,11 +103,17 @@ namespace TraffickController.TrafficLight
                 _count = 0;
             }
 
+            /* TODO:
+             * Dict gebruiken om via 'Key' te kijken welke stoplichten aanmogen
+             * op basis van de 'Value' kijken of de stoplicht aangaat of niet, als deze 0 is
+             * dan hoeft deze niet aan te gaan.
+             */
+
             return SetLightColor(2);
         }
         #endregion
 
-        #region SetLightColor
+        # region SetLightColor
         private static string SetLightColor(int lightColor)
         {
             #region Initialize Variables
@@ -150,7 +154,7 @@ namespace TraffickController.TrafficLight
             int GV4 = 0;
             #endregion
 
-            foreach (var y in _lightsAtSameTime)
+            foreach (var y in lightsAtSameTime)
             {
                 #region Set Lights Values
                 switch (y.Key)
@@ -321,6 +325,6 @@ namespace TraffickController.TrafficLight
 
             return newTrafficLight;
         }
-        #endregion
+        # endregion
     }
 }
