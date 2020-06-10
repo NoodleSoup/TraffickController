@@ -3,10 +3,10 @@ using TraffickController.TrafficLight;
 
 namespace TraffickController.JsonStrings
 {
-    public class JsonStringBuilder
+    public class JsonStringBuilder : IJsonStringBuilder
     {
         #region BuildString
-        public static string BuildJsonString(int A1 = 0, int A2 = 0, int A3 = 0, int A4 = 0, int AB1 = 0, int AB2 = 0,
+        public string BuildJsonString(int A1 = 0, int A2 = 0, int A3 = 0, int A4 = 0, int AB1 = 0, int AB2 = 0,
                                              int B1 = 0, int B2 = 0, int B3 = 0, int B4 = 0, int B5 = 0, int BB1 = 0,
                                              int C1 = 0, int C2 = 0, int C3 = 0, int D1 = 0, int D2 = 0, int D3 = 0,
                                              int E1 = 0, int EV1 = 0, int EV2 = 0, int EV3 = 0, int EV4 = 0,

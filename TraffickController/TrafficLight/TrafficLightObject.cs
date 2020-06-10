@@ -1,5 +1,8 @@
 ﻿namespace TraffickController.TrafficLight
 {
+    /// <summary>
+    /// Datamodel for status from all trafficlights
+    /// </summary>
     public class TrafficLightObject
     {
         public int A1 { get; set; } = 0;

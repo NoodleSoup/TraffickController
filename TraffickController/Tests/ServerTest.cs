@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
@@ -12,11 +11,14 @@ namespace TraffickController.Tests
 {
     public class ServerTest
     {
-        #region Test
-        public static async Task Test(byte[] buffer)
+        private readonly IJsonStringBuilder _jsonStringBuilder;
+        public ServerTest(IJsonStringBuilder jsonStringBuilder) =>
+            (_jsonStringBuilder) = (jsonStringBuilder);
+
+        public async Task Test(byte[] buffer)
         {
             ClientWebSocket cWebSocket = new ClientWebSocket();
-            var uriLink = new Uri("ws://trafic.azurewebsites.net/controller");
+            var uriLink = new Uri("ws://serene-woodland-92641.herokuapp.com/?group=13&type=controller");
             try
             {
                 await cWebSocket.ConnectAsync(uriLink, CancellationToken.None);
@@ -29,15 +31,13 @@ namespace TraffickController.Tests
             }
             while (cWebSocket.State == WebSocketState.Open)
             {
-                await ServerTest.SendStateClient(cWebSocket, buffer);
+                await SendStateClient(cWebSocket, buffer);
             }
         }
-        #endregion
 
-        #region SendStateClient
-        private static async Task SendStateClient(ClientWebSocket cWebSocket, byte[] buffer)
+        private async Task SendStateClient(ClientWebSocket cWebSocket, byte[] buffer)
         {
-            var jsonTrafficLight = JsonStringBuilder.BuildJsonString(); // Start setting up the JSON string builder TODO: Make it send dynamic states
+            var jsonTrafficLight = _jsonStringBuilder.BuildJsonString(); // Start setting up the JSON string builder TODO: Make it send dynamic states
             var jsonBytes = Encoding.UTF8.GetBytes(jsonTrafficLight); // Convert the JSON object to bytes to send over WebSocket connection
 
             await cWebSocket.SendAsync(new ArraySegment<byte>(jsonBytes, 0, jsonBytes.Length), WebSocketMessageType.Text, true, CancellationToken.None);
@@ -56,6 +56,5 @@ namespace TraffickController.Tests
             await cWebSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
 
         }
-        #endregion
     }
 }

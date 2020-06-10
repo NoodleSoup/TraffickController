@@ -10,27 +10,30 @@ using TraffickController.TrafficLight;
 
 namespace TraffickController.WebSocketConnection
 {
-    public class Send
+    public class Send : ISend
     {
-        private static string _jsonTrafficLight = null;
+        private string _jsonTrafficLight = null;
 
-        #region SendSocket
-        private static async Task SendSocket(WebSocket webSocket, string state = "Green")
+        private readonly IData _data;
+        private readonly IJsonStringBuilder _jsonStringBuilder;
+
+        public Send(IData data, IJsonStringBuilder jsonStringBuilder) =>
+            (_data, _jsonStringBuilder) = (data, jsonStringBuilder);
+
+        private async Task SendSocket(WebSocket webSocket, string state = "Green")
         {
-            _jsonTrafficLight = Data.GetNewTrafficLight(state); // Start setting up the JSON string builder JsonStringBuilder.BuildJsonString();
+            _jsonTrafficLight = _data.GetNewTrafficLight(state); // Start setting up the JSON string builder
 
             // If the trafficlight string is empty for some reason send the default response (start state)
             if (String.IsNullOrEmpty(_jsonTrafficLight))
-                _jsonTrafficLight = JsonStringBuilder.BuildJsonString();
+                _jsonTrafficLight = _jsonStringBuilder.BuildJsonString();
 
             var jsonBytes = Encoding.UTF8.GetBytes(_jsonTrafficLight); // Convert the JSON object to bytes to send over WebSocket connection
 
             await webSocket.SendAsync(new ArraySegment<byte>(jsonBytes, 0, jsonBytes.Length), 0, true, CancellationToken.None);
         }
-        #endregion
-
-        #region SendState
-        public static async Task SendState(HttpContext context, WebSocket webSocket)
+        
+        public async Task SendState(HttpContext context, WebSocket webSocket)
         {
             try
             {
@@ -49,17 +52,14 @@ namespace TraffickController.WebSocketConnection
                 return;
             }
         }
-        #endregion
 
-        #region SendStartState
-        public static async Task<bool> SendStartState(HttpContext context, WebSocket webSocket)
+        public async Task<bool> SendStartState(HttpContext context, WebSocket webSocket)
         {
-            var jsonTrafficLight = JsonStringBuilder.BuildJsonString();
+            var jsonTrafficLight = _jsonStringBuilder.BuildJsonString();
             var jsonBytes = Encoding.UTF8.GetBytes(jsonTrafficLight);
 
             await webSocket.SendAsync(new ArraySegment<byte>(jsonBytes, 0, jsonBytes.Length), 0, true, CancellationToken.None);
             return false;
         }
-        #endregion
     }
 }

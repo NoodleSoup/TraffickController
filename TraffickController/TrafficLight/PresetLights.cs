@@ -6,10 +6,9 @@ using TraffickController.JsonStrings;
 
 namespace TraffickController.TrafficLight
 {
-    public class PresetLights
+    public class PresetLights : IPresetLights
     {
-        #region Presets & Count
-        private static readonly List<List<string>> _presets = new List<List<string>>() {
+        private readonly List<List<string>> _presets = new List<List<string>>() {
             new List<string>() { "A1", "A2", "A3", "A4", "D3" },
             new List<string>() { "B1", "B2", "B3", "B4", "C3" },
             new List<string>() { "FF2", "FF1", "FV1", "FV2", "FV3", "FV4", "B5", "E1", "EV1", "EV2", "EV3", "EV4", "GF1", "GF2", "GV1", "GV2", "GV3", "GV4" },
@@ -19,50 +18,54 @@ namespace TraffickController.TrafficLight
             new List<string>() { "D1", "D3", "AB2", "B4" },
             new List<string>() { "FF2", "FF1", "FV1", "FV2", "FV3", "FV4", "B5", "BB1", "C1", "C3" }
         };
-        private static int _count = 0;
-        private static Dictionary<string, int> _lightsAtSameTime = new Dictionary<string, int>();
-        private static Timer _aTimer;
-        private static bool _elapsed = false;
-        #endregion
+        private int _count = 0;
+        private Dictionary<string, int> _lightsAtSameTime = new Dictionary<string, int>();
+        private Timer _aTimer;
+        private bool _elapsed = false;
+        private readonly IJsonStringBuilder _jsonStringBuilder;
 
-        #region ReturnPreset
-        public static string ReturnPreset(Dictionary<string, int> lightsReceived, string state)
+        public PresetLights(IJsonStringBuilder jsonStringBuilder)
         {
-            switch(state){
-                case "Green":
-                    if (lightsReceived == null)
-                        return JsonStringBuilder.BuildJsonString();
-
-                    var result = FindPreset(lightsReceived);
-
-                    return result;
-                case "Orange":
-                    return SetLightColor(1);
-                case "Red":
-                    return JsonStringBuilder.BuildJsonString();
-                default:
-                    return JsonStringBuilder.BuildJsonString();
-            }
-        }
-        #endregion
-
-        #region OnTimedEvent
-        private static void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
-        {
-            _elapsed = true;
-        }
-        #endregion
-
-        #region FindPreset
-        private static string FindPreset(Dictionary<string, int> trafficAtLights)
-        {
-            int oldCount = -1;
+            _jsonStringBuilder = jsonStringBuilder;
+            
             _aTimer = new Timer
             {
                 Interval = 20000,
                 AutoReset = true,
                 Enabled = true
             };
+        }
+
+        public string ReturnPreset(Dictionary<string, int> lightsReceived, string state)
+        {
+            switch(state){
+                case "Green":
+                    if (lightsReceived == null)
+                        return _jsonStringBuilder.BuildJsonString();
+
+                    var result = FindPreset(lightsReceived); // Find preset when simulator sends amount of traffic at trafficlight
+
+                    return result;
+                case "Orange":
+                    return SetLightColor(1); // Set light color of currently green trafficlights
+                case "Red":
+                    return _jsonStringBuilder.BuildJsonString(); // Set trafficlights to red
+                default:
+                    return _jsonStringBuilder.BuildJsonString();
+            }
+        }
+
+        private void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
+        {
+            _elapsed = true;
+        }
+
+        // Loop through presets, give priority to presets with buses
+        private string FindPreset(Dictionary<string, int> trafficAtLights)
+        {
+            int oldCount = -1;
+
+            _aTimer.Start();
 
             _aTimer.Elapsed += OnTimedEvent;
 
@@ -98,19 +101,17 @@ namespace TraffickController.TrafficLight
                     }
                 }
             }
-            if (oldCount > -1) _count = oldCount;
+            if (oldCount > -1) _count = oldCount; // If bus had priority set counter back to old count
             else _count++;
 
             if(_count > 4){
                 _count = 0;
             }
 
-            return SetLightColor(2);
+            return SetLightColor(2); // Set lights from preset to green
         }
-        #endregion
 
-        #region SetLightColor
-        private static string SetLightColor(int lightColor)
+        private string SetLightColor(int lightColor)
         {
             #region Initialize Variables
             int A1 = 0;
@@ -152,6 +153,7 @@ namespace TraffickController.TrafficLight
 
             foreach (var y in _lightsAtSameTime)
             {
+                // Switch case to set light color based on lights in _lightsAtSameTime
                 #region Set Lights Values
                 switch (y.Key)
                 {
@@ -305,7 +307,8 @@ namespace TraffickController.TrafficLight
                 #endregion
             }
 
-            string newTrafficLight = JsonStringBuilder.BuildJsonString(
+            // Generate JSON string from trafficlights data
+            return _jsonStringBuilder.BuildJsonString(
                 A1: A1, A2: A2, A3: A3,
                 A4: A4, AB1: AB1, AB2: AB2,
                 B1: B1, B2: B2, B3: B3,
@@ -318,9 +321,6 @@ namespace TraffickController.TrafficLight
                 FV3: FV3, FV4: FV4, GF1: GF1,
                 GF2: GF2, GV1: GV1, GV2: GV2,
                 GV3: GV3, GV4: GV4);
-
-            return newTrafficLight;
         }
-        #endregion
     }
 }

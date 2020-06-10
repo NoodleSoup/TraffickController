@@ -3,26 +3,25 @@ using System.Collections.Generic;
 
 namespace TraffickController.TrafficLight
 {
-    public class Data
+    public class Data : IData
     {
-        private static TrafficLightObject _trafficLightObject = new TrafficLightObject();
+        private TrafficLightObject _trafficLightObject = new TrafficLightObject();
+        private readonly IPresetLights _presetLights;
 
-        #region SetTrafficData
-        public static void SetTrafficData(TrafficLightObject trafficLightObject)
+        public Data(IPresetLights presetLights) =>
+            _presetLights = presetLights;
+
+        public void SetTrafficData(TrafficLightObject trafficLightObject)
         {
             _trafficLightObject = trafficLightObject;
         }
-        #endregion
 
-        #region GetNewTrafficLight
-        public static string GetNewTrafficLight(string lightColor = "Green")
+        public string GetNewTrafficLight(string lightColor = "Green")
         {
-            return PresetLights.ReturnPreset(ToDict(), lightColor);
+            return _presetLights.ReturnPreset(ToDict(), lightColor);
         }
-        #endregion
 
-        #region ToDict
-        public static Dictionary<string, int> ToDict()
+        public Dictionary<string, int> ToDict()
         {
             Dictionary<string, int> trafficLightDict = new Dictionary<string, int>();
 
@@ -75,6 +74,5 @@ namespace TraffickController.TrafficLight
 
             return trafficLightDict;
         }
-        #endregion
     }
 }
